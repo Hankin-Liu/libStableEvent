@@ -70,29 +70,38 @@ namespace stable_infra {
             close_callback_ = nullptr; 
             error_callback_ = nullptr;
         }
+        
+        void event_action::set_ready_events(uint32_t events)
+        {
+            if (! is_readable_ && events & read_event_) {
+                is_readable_ = true;
+            }
+            if (! is_writable_ && events & write_event_) {
+                is_writable_ = true;
+            }
+            handle_events();
+        }
 
         void event_action::handle_events()
         {
-            //if ((events & close_event_) && !(events & read_event_)) {
-            //    if (close_callback_ != nullptr) {
-            //        close_callback_();
-            //    }
-            //}
-            //if (events & error_event_) {
-            //    if (error_callback_ != nullptr) {
-            //        error_callback_();
-            //    }
-            //}
-            //if (events & read_event_) {
-            //    if (read_callback_ != nullptr) {
-            //        read_callback_(ret);
-            //    }
-            //}
-            //if (events & write_event_) {
-            //    if (write_callback_ != nullptr) {
-            //        write_callback_(ret);
-            //    }
-            //}
+            if (is_readable_ && ! pending_read_task_.empty()) {
+                for (const auto& t : pending_read_task_) {
+                    do_read_task(t);
+                }
+            }
+            if (is_writable_ && ! pending_write_task_.empty()) {
+                for (const auto& t : pending_write_task_) {
+                    do_write_task(t);
+                }
+            }
+        }
+
+        void event_action::do_read_task(const task& t)
+        {
+        }
+
+        void event_action::do_write_task(const task& t)
+        {
         }
     }
 }

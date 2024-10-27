@@ -9,11 +9,24 @@
 #pragma once
 #include <deque>
 #include "event_common.h"
+#include "fd_io_operation.h"
 #include "../common/type_def.h"
 
 namespace stable_infra {
     namespace event {
         using callback_t = std::function<void(int32_t)>;
+
+        enum class FD_TYPE: uint32_t
+        {
+            ACCEPT_FD = 0,
+            TCP_FD = 1,
+            UDP_FD = 2,
+            FILE_FD = 3,
+            TIMER_FD = 4,
+            SIGNAL_FD = 5,
+            EVENT_FD = 6,
+        };
+
         class task
         {
             public:
@@ -24,6 +37,8 @@ namespace stable_infra {
                 iovec* buffer_{ nullptr };
                 uint32_t buffer_iov_cnt_{ 0 };
         };
+
+        class fd_io_operation;
         class event_action
         {
             public:
@@ -57,14 +72,7 @@ namespace stable_infra {
                 inline bool is_writable() const {
                     return is_writable_;
                 }
-                inline void set_ready_events(uint32_t events) {
-                    if (events & read_event_) {
-                        is_readable_ = true;
-                    }
-                    if (events & write_event_) {
-                        is_writable_ = true;
-                    }
-                }
+                void set_ready_events(uint32_t events);
                 void set_write_callback(const callback& cb);
                 void set_close_callback(const callback& cb);
                 void set_error_callback(const callback& cb);
@@ -77,6 +85,9 @@ namespace stable_infra {
                 void disable_closing();
                 void disable_error();
                 void disable_all();
+            private:
+                void do_read_task(const task& t);
+                void do_write_task(const task& t);
             private:
                 static const int32_t none_event_;
                 static const int32_t read_event_;
@@ -93,6 +104,7 @@ namespace stable_infra {
                 std::deque<task> pending_write_task_{};
                 bool is_readable_{ false };
                 bool is_writable_{ false };
+                std::shared_ptr<fd_io_operation> io_ops_{ nullptr };
         };
     }
 }
