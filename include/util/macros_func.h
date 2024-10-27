@@ -8,14 +8,22 @@
  */
 #pragma once
 
+#if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ > 91)
+#define STABLE_INFRA_LIKELY(x) __builtin_expect(!!(x), 1)
+#define STABLE_INFRA_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+#define STABLE_INFRA_LIKELY(x) (x)
+#define STABLE_INFRA_UNLIKELY(x) (x)
+#endif
+
 #define STABLE_INFRA_CHECK_SUC(expr, ret) \
-    if ((!(expr))) [[unlikely]] \
+    if ((STABLE_INFRA_UNLIKELY(!(expr)))) \
     {\
         return (ret); \
     }
 
 #define STABLE_INFRA_ASSERT(expr) \
-    if (!(expr)) [[unlikely]] \
+    if ((STABLE_INFRA_UNLIKELY(!(expr)))) \
     {\
         printf("%s:%d|%s\n", __FILE__, __LINE__, __FUNCTION__);\
         std::exit(-1);\
