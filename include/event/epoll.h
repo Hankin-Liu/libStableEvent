@@ -119,11 +119,11 @@ namespace stable_infra {
                  */
                 virtual void close() override;
 
-                virtual int32_t submit_async_read(fd_t fd, iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb) override;
+                virtual int32_t submit_async_read(fd_t fd, ::iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb) override;
 
-                virtual int32_t submit_async_accept(fd_t listen_fd, iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb) override;
+                virtual int32_t submit_async_accept(fd_t listen_fd, ::iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb) override;
 
-                virtual int32_t submit_async_write(fd_t fd, iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb) override;
+                virtual int32_t submit_async_write(fd_t fd, ::iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb) override;
             private:
                 /**
                  * @brief make changed event effective

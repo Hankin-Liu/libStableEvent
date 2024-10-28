@@ -7,7 +7,11 @@
  *          which can be found in the LICENSE file
  ***************************************************************************************/
 #include <sys/epoll.h>
+#include <cstdio>
+#include <cstdlib>
 #include "../../include/event/event_action.h"
+#include "../../include/util/macros_func.h"
+#include "../../include/event/fd_io_operation.h"
 
 namespace stable_infra {
     namespace event {
@@ -96,12 +100,51 @@ namespace stable_infra {
             }
         }
 
+        void event_action::set_fd_type(const FD_TYPE type)
+        {
+            STABLE_INFRA_ASSERT(type != FD_TYPE::UNSET);
+            fd_operations ops;
+            switch(type) {
+            case FD_TYPE::TCP_FD:
+                {
+                    ops.read = &fd_io_operation<FD_TYPE_TCP>::read_fd;
+                    ops.write = &fd_io_operation<FD_TYPE_TCP>::write_fd;
+                    break;
+                }
+            case FD_TYPE::UDP_FD:
+                {
+                    ops.read = &fd_io_operation<FD_TYPE_UDP>::read_fd;
+                    ops.write = &fd_io_operation<FD_TYPE_UDP>::write_fd;
+                    break;
+                }
+            case FD_TYPE::FILE_FD:
+            case FD_TYPE::TIMER_FD:
+            case FD_TYPE::SIGNAL_FD:
+            case FD_TYPE::EVENT_FD:
+            case FD_TYPE::ACCEPT_FD:
+                {
+                    ops.read = &fd_io_operation<FD_TYPE_FILE>::read_fd;
+                    ops.write = &fd_io_operation<FD_TYPE_FILE>::write_fd;
+                    break;
+                }
+            default:
+                {
+                }
+            }
+            fd_ops_ = ops;
+            fd_type_ = type;
+        }
+
         void event_action::do_read_task(const task& t)
         {
+            auto ret = fd_ops_.read(fd_, t.buffer_, t.buffer_iov_cnt_);
+            // TODO
         }
 
         void event_action::do_write_task(const task& t)
         {
+            auto ret = fd_ops_.write(fd_, t.buffer_, t.buffer_iov_cnt_);
+            // TODO
         }
     }
 }

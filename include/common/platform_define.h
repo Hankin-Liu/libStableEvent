@@ -13,10 +13,6 @@
 #define _OS_WINDOW_64
 #elif defined(_WIN32)
 #define _OS_WINDOW_32
-#elif defined(__APPLE__)
-#define _OS_APPLE
-#elif defined(__ANDROID__)
-#define _OS_ANDROID
 #elif defined(__linux__)
 #define _OS_LINUX
 #else

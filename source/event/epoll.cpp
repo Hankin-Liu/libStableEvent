@@ -37,7 +37,7 @@ namespace stable_infra {
             return true;
         }
 
-        int32_t epoll::submit_async_accept(fd_t listen_fd, iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb)
+        int32_t epoll::submit_async_accept(fd_t listen_fd, ::iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb)
         {
             if (epfd_ == INVALID_FD || listen_fd < 0) {
                 return -1;
@@ -76,7 +76,7 @@ namespace stable_infra {
             return 0;
         }
 
-        int32_t epoll::submit_async_write(fd_t fd, iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb)
+        int32_t epoll::submit_async_write(fd_t fd, ::iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb)
         {
             if (epfd_ == INVALID_FD || fd < 0) {
                 return -1;
@@ -115,7 +115,7 @@ namespace stable_infra {
             return 0;
         }
 
-        int32_t epoll::submit_async_read(fd_t fd, iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb)
+        int32_t epoll::submit_async_read(fd_t fd, ::iovec* buffer, uint32_t buffer_iov_cnt, const std::function<void(int32_t)>& cb)
         {
             if (epfd_ == INVALID_FD || fd < 0) {
                 return -1;

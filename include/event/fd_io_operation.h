@@ -16,11 +16,13 @@ namespace stable_infra {
         class fd_io_operation
         {
         public:
-            static int32_t read_fd(fd_t fd, iovec* iov, uint32_t iov_cnt)
+            static int32_t read_fd(fd_t fd, ::iovec* iov, uint32_t iov_cnt)
             {
+                return 0;
             }
-            static int32_t write_fd(fd_t fd, iovec* iov, uint32_t iov_cnt)
+            static int32_t write_fd(fd_t fd, ::iovec* iov, uint32_t iov_cnt)
             {
+                return 0;
             }
         };
     }

@@ -9,7 +9,6 @@
 #pragma once
 #include <deque>
 #include "event_common.h"
-#include "fd_io_operation.h"
 #include "../common/type_def.h"
 
 namespace stable_infra {
@@ -18,27 +17,40 @@ namespace stable_infra {
 
         enum class FD_TYPE: uint32_t
         {
-            ACCEPT_FD = 0,
+            UNSET = 0,
             TCP_FD = 1,
+#define FD_TYPE_TCP 1
             UDP_FD = 2,
-            FILE_FD = 3,
+#define FD_TYPE_UDP 2
+            ACCEPT_FD = 3,
+#define FD_TYPE_ACCEPT 3
             TIMER_FD = 4,
+#define FD_TYPE_TIMER 4
             SIGNAL_FD = 5,
+#define FD_TYPE_SIGNAL 5
             EVENT_FD = 6,
+#define FD_TYPE_EVENT 6
+            FILE_FD = 7,
+#define FD_TYPE_FILE 7
+        };
+
+        struct fd_operations
+        {
+            int32_t (*read)(fd_t fd, ::iovec* iov, uint32_t iov_cnt);
+            int32_t (*write)(fd_t fd, ::iovec* iov, uint32_t iov_cnt);
         };
 
         class task
         {
             public:
-                task(iovec* buffer, uint32_t buffer_iov_cnt)
+                task(::iovec* buffer, uint32_t buffer_iov_cnt)
                     : buffer_(buffer), buffer_iov_cnt_(buffer_iov_cnt)
                 {
                 }
-                iovec* buffer_{ nullptr };
+                ::iovec* buffer_{ nullptr };
                 uint32_t buffer_iov_cnt_{ 0 };
         };
 
-        class fd_io_operation;
         class event_action
         {
             public:
@@ -46,6 +58,7 @@ namespace stable_infra {
                 ~event_action();
 
                 void handle_events();
+                void set_fd_type(const FD_TYPE type);
                 inline void set_read_callback(const callback_t& cb) {
                     events_ |= read_event_; 
                     read_callback_ = cb;
@@ -104,7 +117,8 @@ namespace stable_infra {
                 std::deque<task> pending_write_task_{};
                 bool is_readable_{ false };
                 bool is_writable_{ false };
-                std::shared_ptr<fd_io_operation> io_ops_{ nullptr };
+                FD_TYPE fd_type_{ FD_TYPE::UNSET };
+                fd_operations fd_ops_{};
         };
     }
 }
