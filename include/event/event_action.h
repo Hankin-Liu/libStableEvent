@@ -16,17 +16,17 @@ namespace stable_infra {
     namespace event {
         using callback_t = std::function<void(int32_t)>;
 
-        enum class FD_TYPE: uint32_t
-        {
-            UNSET = 0,
-            TCP_FD = 1,
-            UDP_FD = 2,
-            ACCEPT_FD = 3,
-            TIMER_FD = 4,
-            SIGNAL_FD = 5,
-            EVENT_FD = 6,
-            FILE_FD = 7,
-        };
+//        enum class FD_TYPE: uint32_t
+//        {
+//            UNSET = 0,
+//            TCP_FD = 1,
+//            UDP_FD = 2,
+//            ACCEPT_FD = 3,
+//            TIMER_FD = 4,
+//            SIGNAL_FD = 5,
+//            EVENT_FD = 6,
+//            FILE_FD = 7,
+//        };
 
         struct fd_operations
         {
@@ -111,7 +111,7 @@ namespace stable_infra {
                 std::deque<task> pending_write_task_{};
                 bool is_readable_{ false };
                 bool is_writable_{ false };
-                FD_TYPE fd_type_{ FD_TYPE::UNSET };
+                FD_TYPE fd_type_{ FD_TYPE::UNKNOWN_FD };
                 fd_operations fd_ops_{};
                 std::vector<::iovec> read_iov_buffer_;
                 std::vector<::iovec> write_iov_buffer_;

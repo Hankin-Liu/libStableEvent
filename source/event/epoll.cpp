@@ -47,6 +47,7 @@ namespace stable_infra {
             if (nullptr == evt_info_ptr) {
                 evt_info_ptr = std::make_shared<event_info>();
                 evt_info_ptr->fd_ = listen_fd;
+                evt_info_ptr->event_action_ptr_->set_fd_type(FD_TYPE::GENERAL_FD);
                 is_evt_exist = false;
             }
             if (cb != nullptr) {
@@ -86,6 +87,11 @@ namespace stable_infra {
             if (nullptr == evt_info_ptr) {
                 evt_info_ptr = std::make_shared<event_info>();
                 evt_info_ptr->fd_ = fd;
+                auto fd_type = stable_infra::util::get_fd_type(fd);
+                if (fd_type == FD_TYPE::UNKNOWN_FD) {
+                    return -1;
+                }
+                evt_info_ptr->event_action_ptr_->set_fd_type(fd_type);
                 is_evt_exist = false;
             }
             if (cb != nullptr) {
@@ -125,6 +131,11 @@ namespace stable_infra {
             if (nullptr == evt_info_ptr) {
                 evt_info_ptr = std::make_shared<event_info>();
                 evt_info_ptr->fd_ = fd;
+                auto fd_type = stable_infra::util::get_fd_type(fd);
+                if (fd_type == FD_TYPE::UNKNOWN_FD) {
+                    return -1;
+                }
+                evt_info_ptr->event_action_ptr_->set_fd_type(fd_type);
                 is_evt_exist = false;
             }
             if (cb != nullptr) {

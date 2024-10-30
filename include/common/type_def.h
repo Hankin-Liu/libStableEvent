@@ -26,3 +26,10 @@ struct iovec
         typedef int32_t fd_t;
         typedef uint32_t signo_t;
 #endif
+
+enum class FD_TYPE: uint32_t {
+    TCP_FD = 1,
+    UDP_FD = 2,
+    GENERAL_FD = 3,  // 包括 FILE_FD, SIGNAL_FD, EVENT_FD, TIMER_FD
+    UNKNOWN_FD = 8
+};

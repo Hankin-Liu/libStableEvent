@@ -116,7 +116,7 @@ namespace stable_infra {
 
         void event_action::set_fd_type(const FD_TYPE type)
         {
-            STABLE_INFRA_ASSERT(type != FD_TYPE::UNSET);
+            STABLE_INFRA_ASSERT(type != FD_TYPE::UNKNOWN_FD);
             fd_operations ops;
             switch(type) {
             case FD_TYPE::TCP_FD:
@@ -131,19 +131,10 @@ namespace stable_infra {
                     ops.write = &fd_io_operation<FD_TYPE_UDP>::write_fd;
                     break;
                 }
-            case FD_TYPE::FILE_FD:
+            case FD_TYPE::GENERAL_FD:
                 {
-                    ops.read = &fd_io_operation<FD_TYPE_FILE>::read_fd;
-                    ops.write = &fd_io_operation<FD_TYPE_FILE>::write_fd;
-                    break;
-                }
-            case FD_TYPE::TIMER_FD:
-            case FD_TYPE::SIGNAL_FD:
-            case FD_TYPE::EVENT_FD:
-            case FD_TYPE::ACCEPT_FD:
-                {
-                    ops.read = &fd_io_operation<FD_TYPE_EVENT>::read_fd;
-                    ops.write = &fd_io_operation<FD_TYPE_EVENT>::write_fd;
+                    ops.read = &fd_io_operation<FD_TYPE_GENERAL>::read_fd;
+                    ops.write = &fd_io_operation<FD_TYPE_GENERAL>::write_fd;
                     break;
                 }
             default:

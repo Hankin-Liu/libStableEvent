@@ -98,5 +98,28 @@ namespace stable_infra {
             }
             return -1;
         }
+
+        FD_TYPE get_fd_type(int fd)
+        {
+            struct stat st;
+            if (fstat(fd, &st) == 0) {
+                if (S_ISSOCK(st.st_mode)) {
+                    int type;
+                    socklen_t len = sizeof(type);
+                    if (getsockopt(fd, SOL_SOCKET, SO_TYPE, &type, &len) == 0) {
+                        if (type == SOCK_STREAM) {
+                            return FD_TYPE::TCP_FD;
+                        } else if (type == SOCK_DGRAM) {
+                            return FD_TYPE::UDP_FD;
+                        }
+                    }
+                    return FD_TYPE::UNKNOWN_FD;
+                } else {
+                    // FILE_FD, SIGNAL_FD, EVENT_FD, TIMER_FD -> OTHER_FD
+                    return FD_TYPE::GENERAL_FD;
+                }
+            }
+            return FD_TYPE::UNKNOWN_FD;
+        }
     }
 }
