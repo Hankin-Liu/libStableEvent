@@ -29,5 +29,7 @@ namespace stable_infra {
         int32_t util_closesocket(fd_t sock);
         
         int32_t util_make_fd_nonblocking(fd_t fd);
+
+        int32_t move_iov(::iovec*& iov, uint32_t& iov_cnt, uint32_t move_size);
     }
 }

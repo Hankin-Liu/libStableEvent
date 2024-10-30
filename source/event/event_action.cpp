@@ -89,13 +89,27 @@ namespace stable_infra {
         void event_action::handle_events()
         {
             if (is_readable_ && ! pending_read_task_.empty()) {
-                for (const auto& t : pending_read_task_) {
-                    do_read_task(t);
+                auto size = pending_read_task_.size();
+                for (uint32_t i = 0; i < size; ++i) {
+                    auto& t = pending_read_task_.front();
+                    auto ret = do_read_task(t);
+                    if (ret == INT32_MAX) {
+                        is_readable_ = false;
+                        pending_read_task_.push_back(t);
+                    }
+                    pending_read_task_.pop_front();
                 }
             }
             if (is_writable_ && ! pending_write_task_.empty()) {
-                for (const auto& t : pending_write_task_) {
-                    do_write_task(t);
+                auto size = pending_write_task_.size();
+                for (uint32_t i = 0; i < size; ++i) {
+                    auto& t = pending_write_task_.front();
+                    auto ret = do_write_task(t);
+                    if (ret == INT32_MAX) {
+                        is_writable_ = false;
+                        pending_write_task_.push_back(t);
+                    }
+                    pending_write_task_.pop_front();
                 }
             }
         }
@@ -118,13 +132,18 @@ namespace stable_infra {
                     break;
                 }
             case FD_TYPE::FILE_FD:
+                {
+                    ops.read = &fd_io_operation<FD_TYPE_FILE>::read_fd;
+                    ops.write = &fd_io_operation<FD_TYPE_FILE>::write_fd;
+                    break;
+                }
             case FD_TYPE::TIMER_FD:
             case FD_TYPE::SIGNAL_FD:
             case FD_TYPE::EVENT_FD:
             case FD_TYPE::ACCEPT_FD:
                 {
-                    ops.read = &fd_io_operation<FD_TYPE_FILE>::read_fd;
-                    ops.write = &fd_io_operation<FD_TYPE_FILE>::write_fd;
+                    ops.read = &fd_io_operation<FD_TYPE_EVENT>::read_fd;
+                    ops.write = &fd_io_operation<FD_TYPE_EVENT>::write_fd;
                     break;
                 }
             default:
@@ -135,16 +154,30 @@ namespace stable_infra {
             fd_type_ = type;
         }
 
-        void event_action::do_read_task(const task& t)
+        int32_t event_action::do_read_task(const task& t)
         {
-            auto ret = fd_ops_.read(fd_, t.buffer_, t.buffer_iov_cnt_);
-            // TODO
+            if (STABLE_INFRA_UNLIKELY(t.buffer_iov_cnt_ > read_iov_buffer_.size())) {
+                read_iov_buffer_.resize(t.buffer_iov_cnt_);
+            }
+            memcpy((void*)read_iov_buffer_.data(), t.buffer_, sizeof(::iovec) * t.buffer_iov_cnt_);
+            bool is_empty = false;
+            auto ret = fd_ops_.read(fd_, read_iov_buffer_.data(), t.buffer_iov_cnt_, is_empty);
+            STABLE_INFRA_IF_TRUE_RETURN_CODE(is_empty && ret == 0, INT32_MAX);
+            read_callback_(ret);
+            return 0;
         }
 
-        void event_action::do_write_task(const task& t)
+        int32_t event_action::do_write_task(const task& t)
         {
-            auto ret = fd_ops_.write(fd_, t.buffer_, t.buffer_iov_cnt_);
-            // TODO
+            if (STABLE_INFRA_UNLIKELY(t.buffer_iov_cnt_ > write_iov_buffer_.size())) {
+                read_iov_buffer_.resize(t.buffer_iov_cnt_);
+            }
+            memcpy((void*)write_iov_buffer_.data(), t.buffer_, sizeof(::iovec) * t.buffer_iov_cnt_);
+            bool is_full = false;
+            auto ret = fd_ops_.write(fd_, write_iov_buffer_.data(), t.buffer_iov_cnt_, is_full);
+            STABLE_INFRA_IF_TRUE_RETURN_CODE(is_full && ret == 0, INT32_MAX);
+            read_callback_(ret);
+            return 0;
         }
     }
 }

@@ -7,6 +7,7 @@
  *          which can be found in the LICENSE file
  ***************************************************************************************/
 #pragma once
+#include <vector>
 #include <deque>
 #include "event_common.h"
 #include "../common/type_def.h"
@@ -19,25 +20,18 @@ namespace stable_infra {
         {
             UNSET = 0,
             TCP_FD = 1,
-#define FD_TYPE_TCP 1
             UDP_FD = 2,
-#define FD_TYPE_UDP 2
             ACCEPT_FD = 3,
-#define FD_TYPE_ACCEPT 3
             TIMER_FD = 4,
-#define FD_TYPE_TIMER 4
             SIGNAL_FD = 5,
-#define FD_TYPE_SIGNAL 5
             EVENT_FD = 6,
-#define FD_TYPE_EVENT 6
             FILE_FD = 7,
-#define FD_TYPE_FILE 7
         };
 
         struct fd_operations
         {
-            int32_t (*read)(fd_t fd, ::iovec* iov, uint32_t iov_cnt);
-            int32_t (*write)(fd_t fd, ::iovec* iov, uint32_t iov_cnt);
+            int32_t (*read)(fd_t fd, ::iovec* iov, uint32_t iov_cnt, bool& is_empty);
+            int32_t (*write)(fd_t fd, ::iovec* iov, uint32_t iov_cnt, bool& is_full);
         };
 
         class task
@@ -99,8 +93,8 @@ namespace stable_infra {
                 void disable_error();
                 void disable_all();
             private:
-                void do_read_task(const task& t);
-                void do_write_task(const task& t);
+                int32_t do_read_task(const task& t);
+                int32_t do_write_task(const task& t);
             private:
                 static const int32_t none_event_;
                 static const int32_t read_event_;
@@ -119,6 +113,8 @@ namespace stable_infra {
                 bool is_writable_{ false };
                 FD_TYPE fd_type_{ FD_TYPE::UNSET };
                 fd_operations fd_ops_{};
+                std::vector<::iovec> read_iov_buffer_;
+                std::vector<::iovec> write_iov_buffer_;
         };
     }
 }

@@ -78,5 +78,25 @@ namespace stable_infra {
 #endif
             return RET_SUC;
         }
+
+        int32_t move_iov(::iovec*& iov, uint32_t& iov_cnt, uint32_t move_size)
+        {
+            if (iov_cnt == 0) {
+                return -1;
+            }
+            uint32_t tmp_iov_cnt = iov_cnt;
+            for (uint32_t i = 0; i < tmp_iov_cnt; ++i) {
+                if (move_size >= iov->iov_len) {
+                    move_size -= iov->iov_len;
+                    ++iov;
+                    --iov_cnt;
+                    continue;
+                }
+                iov->iov_base = (char*)iov->iov_base + move_size;
+                iov->iov_len -= move_size;
+                return 0;
+            }
+            return -1;
+        }
     }
 }
